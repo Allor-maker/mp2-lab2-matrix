@@ -55,10 +55,8 @@ public:
   }
   TDynamicVector(TDynamicVector&& v) noexcept//конструктор перемещения
   {
-      pMem = v.pMem;
-      v.pMem = nullptr;
-      sz = v.sz;
-      v.sz = 0;
+      pMem = nullptr;
+      swap(*this, v);
   }
   ~TDynamicVector()
   {
@@ -68,27 +66,18 @@ public:
   {
      if (this == &v)
          return *this;
-      
-    sz = v.sz;
-    delete[] pMem;
-    pMem = new T[sz];
-    for (int i = 0; i < sz; i++)
-    {
-        pMem[i] = v.pMem[i];
-    }
-    return *this;
-      
+     if (sz != v.sz)
+     {
+         sz = v.sz;
+         delete[] pMem;
+         pMem = new T[sz];
+     }
+     std::copy(v.pMem, v.pMem + sz, pMem);
+     return *this;
   }
   TDynamicVector& operator=(TDynamicVector&& v) noexcept  
   {
-      if (this != &v)
-      {
-          delete[] pMem;
-          pMem = v.pMem;
-          v.pMem = nullptr;
-          sz = v.sz;
-          v.sz = 0;
-      }
+      swap(*this, v);
       return *this;
   }
 
@@ -235,14 +224,14 @@ public:
 // Динамическая матрица - 
 // шаблонная матрица на динамической памяти
 template<typename T>
-class TDynamicMatrix : public TDynamicVector<TDynamicVector<T>>
+class TDynamicMatrix : private TDynamicVector<TDynamicVector<T>>
 {
   using TDynamicVector<TDynamicVector<T>>::pMem;
   using TDynamicVector<TDynamicVector<T>>::sz;
 public:
   TDynamicMatrix(size_t s = 1) : TDynamicVector<TDynamicVector<T>>(s)
   {
-    if (s<0 || s>MAX_MATRIX_SIZE)
+    if (s>MAX_MATRIX_SIZE)
         throw 0;
     for (size_t i = 0; i < sz; i++)
         pMem[i] = TDynamicVector<T>(sz);
@@ -268,27 +257,28 @@ public:
 
   }
   using TDynamicVector<TDynamicVector<T>>::operator[];
+  using TDynamicVector<TDynamicVector<T>>::size;
+  using TDynamicVector<TDynamicVector<T>>::at;
 
   TDynamicMatrix(TDynamicMatrix&& m) noexcept
   {
-      sz = m.sz;
-      pMem = m.pMem;
-      m.sz = 0;
-      m.pMem = nullptr;
+      pMem = nullptr;
+      swap(*this, m);
   }
   
   TDynamicMatrix& operator=(const TDynamicMatrix& m)
   {
-      if (this != &m)
+      if (this == &m)
+      {
+          return *this;
+      }
+      if(sz!=m.sz)
       {
           sz = m.sz;
           delete[] pMem;
           pMem = new TDynamicVector<T>[m.sz];
-          for (int i = 0; i < sz; i++)
-          {
-              pMem[i] = m.pMem[i];
-          }
       }
+      std::copy(m.pMem, m.pMem + sz, pMem);
       return *this;
   }
   TDynamicMatrix& operator=(TDynamicMatrix&& m) noexcept
@@ -305,16 +295,7 @@ public:
   // сравнение
   bool operator==(const TDynamicMatrix& m) const noexcept
   {
-      if (sz != m.sz) return false;
-
-      for (int i = 0; i < sz; i++)
-      {
-          if (pMem[i] != m.pMem[i])
-          {
-              return false;
-          }
-      }
-      return true;
+      return TDynamicVector<TDynamicVector<T>>::operator==(m);
   }
   bool operator!=(const TDynamicMatrix& m) const noexcept
   {
