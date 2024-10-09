@@ -56,6 +56,7 @@ public:
   TDynamicVector(TDynamicVector&& v) noexcept//конструктор перемещения
   {
       pMem = nullptr;
+      sz = 0;
       swap(*this, v);
   }
   ~TDynamicVector()
@@ -78,6 +79,8 @@ public:
   TDynamicVector& operator=(TDynamicVector&& v) noexcept  
   {
       swap(*this, v);
+      v.pMem = nullptr;
+      v.sz = 0;
       return *this;
   }
 
@@ -262,8 +265,10 @@ public:
 
   TDynamicMatrix(TDynamicMatrix&& m) noexcept
   {
-      pMem = nullptr;
-      swap(*this, m);
+      sz = m.sz;
+      pMem = m.pMem;
+      m.sz = 0;
+      m.pMem = nullptr;
   }
   
   TDynamicMatrix& operator=(const TDynamicMatrix& m)
