@@ -29,7 +29,10 @@ TEST(TDynamicVector, can_create_vector_with_std_vector)//добавил тест для констр
 
     TDynamicVector<int> b(a);
 
-    std::cout << b << std::endl;
+    EXPECT_EQ(b[0], a[0]);
+    EXPECT_EQ(b[1], a[1]);
+    EXPECT_EQ(b[2], a[2]);
+
 }
 //TEST(TDynamicVector, operator_cin)//тест для проверки ввода/вывода
 //{
@@ -261,4 +264,27 @@ TEST(TDynamicVector, cant_multiply_vectors_with_not_equal_size)
     ASSERT_ANY_THROW(v1 * v2);
 }
 
+TEST(TDynamicVector, move_constructor_work_correctly)
+{
+    std::vector<int> a1 = { 1,2,3,4 };
+    TDynamicVector<int> v1(a1);
+    TDynamicVector<int> v2 = std::move(v1);
 
+    TDynamicVector<int> v(a1);
+
+    EXPECT_EQ(v2, v);
+    EXPECT_EQ(v1.size(), 0);
+}
+
+TEST(TDynamicVector, can_move_object)
+{
+    std::vector<int> a1 = { 1,2,3,4 };
+    TDynamicVector<int> v1(a1);   
+    TDynamicVector<int> v(a1);
+
+    TDynamicVector<int> v2; 
+    v2 = std::move(v1);
+
+    EXPECT_EQ(v2, v);
+    EXPECT_EQ(v1.size(), 0);
+}

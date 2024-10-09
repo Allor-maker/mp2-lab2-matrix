@@ -24,9 +24,13 @@ TEST(TDynamicMatrix, can_create_copied_matrix)
 }
 TEST(TDynamicMatrix, cam_create_matrix_with_std_vector)//тест для проверки конструктора преобразования из std::vector<vector<T>> в TDynamicMatrix<T>
 {
-    std::vector<vector<int>> a = { {1,2,3},{4,5,6},{7,8,9} };
+    std::vector<vector<int>> a = { {1,2},{3,4 } };
     TDynamicMatrix<int> m1(a);
-    std::cout << m1 << std::endl;
+   
+    EXPECT_EQ(m1[0][0], a[0][0]);
+    EXPECT_EQ(m1[0][1], a[0][1]);
+    EXPECT_EQ(m1[1][0], a[1][0]);
+    EXPECT_EQ(m1[1][1], a[1][1]);
 }
 //TEST(TDynamicMatrix, operator_cin)//тест для проверки ввода/вывода
 //{
@@ -234,5 +238,29 @@ TEST(TDynamicMatrix, cant_mult_matrix_with_diff_size)//тест на исключение при ум
     TDynamicMatrix<int> m2(b);
 
     ASSERT_ANY_THROW(m1*m2);
+}
+
+TEST(TDynamicMatrix, move_constructor_work_correctly)
+{
+    std::vector<vector<int>> a1 = { (1,2),{3,4} };
+    TDynamicMatrix<int> m1(a1);
+    TDynamicMatrix<int> m2 = std::move(m1);
+
+    TDynamicMatrix<int> m(a1);
+
+    EXPECT_EQ(m2, m);
+    EXPECT_EQ(m1.size(), 0);
+}
+TEST(TDynamicMatrix, can_move_object)
+{
+    std::vector<vector<int>> a1 = { {1,2},{3,4} };
+    TDynamicMatrix<int> m1(a1);
+    TDynamicMatrix<int> m(a1);
+
+    TDynamicMatrix<int> m2;
+    m2 = std::move(m1);
+
+    EXPECT_EQ(m2, m);
+    EXPECT_EQ(m1.size(), 0);
 }
 
